@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-      
+
 jobs:
   deploy:
     runs-on: self-hosted
@@ -16,7 +16,14 @@ jobs:
 
       - name: Set up Node.js
         run: |
-          node -v || (curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs)
+          # Check if we have Node.js 18+ and npm
+          NODE_VERSION=$(node -v 2>/dev/null | cut -d'v' -f2 | cut -d'.' -f1 || echo "0")
+          if [ "$NODE_VERSION" -lt 18 ] || ! command -v npm &> /dev/null; then
+            echo "Installing Node.js 20..."
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+          fi
+          node -v
           npm -v
 
       - name: Install dependencies
