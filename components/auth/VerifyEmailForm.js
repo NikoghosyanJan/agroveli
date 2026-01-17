@@ -57,6 +57,8 @@ export default function VerifyEmailForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+
     console.log('Verification code:', code.join(''));
     // Add your verification logic here
   };
@@ -104,7 +106,7 @@ export default function VerifyEmailForm() {
           </button>
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button disabled={code.some(item => !item)} type="submit" className="w-full">
           Verify
           <ArrowRight size={20} />
         </Button>

@@ -1,31 +1,20 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { ChevronLeft, ChevronRight, Heart, Star, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Swiper } from "swiper/react";
+import { SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import Image from "next/image";
+import Link from "next/link";
 
 export function ProductCarousel({ title, products, badgeColor, badgeIcon }) {
-  const [favorites, setFavorites] = useState(products.filter((p) => p.favorite).map((p) => p.id))
-  const scrollRef = useRef(null)
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [favorites, setFavorites] = useState(products?.filter((p) => p.favorite).map((p) => p.id))
 
   const toggleFavorite = (productId) => {
     setFavorites((prev) => (prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]))
-  }
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const cardWidth = 288 // approximate card width + gap
-      const scrollAmount = direction === "left" ? -cardWidth : cardWidth
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
-
-      if (direction === "right" && currentSlide < products.length - 1) {
-        setCurrentSlide(currentSlide + 1)
-      } else if (direction === "left" && currentSlide > 0) {
-        setCurrentSlide(currentSlide - 1)
-      }
-    }
   }
 
   const BadgeIcon = badgeIcon === "star" ? Star : Tag
@@ -33,10 +22,10 @@ export function ProductCarousel({ title, products, badgeColor, badgeIcon }) {
   return (
     <section className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-8">
         <div
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-medium",
+            "inline-flex h-12 items-center gap-2 px-4 py-2 rounded-md text-white text-sm font-medium",
             badgeColor,
           )}
         >
@@ -47,50 +36,51 @@ export function ProductCarousel({ title, products, badgeColor, badgeIcon }) {
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full border-border bg-transparent"
-            onClick={() => scroll("left")}
+            className="swiper-button-prev-custom h-8 w-8 rounded-full border-border bg-transparent"
+            // onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full border-border bg-transparent"
-            onClick={() => scroll("right")}
+            className="swiper-button-next-custom h-8 w-8 rounded-full border-border bg-transparent"
+            // onClick={() => scroll("right")}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Products */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-4 px-4 snap-x snap-mandatory"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+
+
+      <Swiper
+        modules={[Navigation, Autoplay]}
+        navigation={{
+          prevEl: ".swiper-button-prev-custom",
+          nextEl: ".swiper-button-next-custom",
+        }}
+        spaceBetween={20}
+        slidesPerView={4}
+        autoplay={{ delay: 3000 }}
+        loop={products.length > 4}
       >
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isFavorite={favorites.includes(product.id)}
-            onToggleFavorite={() => toggleFavorite(product.id)}
-          />
-        ))}
-      </div>
+          <SwiperSlide key={product.id}>
+            <ProductCard
+              key={product.id}
+              product={product}
+              isFavorite={favorites.includes(product.id)}
+              onToggleFavorite={(e) =>{
+                e.preventDefault();
+                toggleFavorite(product.id)
+              }}
+            />
+          </SwiperSlide>
 
-      {/* Dots Indicator (Mobile) */}
-      <div className="flex justify-center gap-1.5 md:hidden">
-        {products.slice(0, 4).map((_, index) => (
-          <div
-            key={index}
-            className={cn(
-              "w-2 h-2 rounded-full transition-colors",
-              index === currentSlide % 4 ? "bg-emerald-600" : "bg-border",
-            )}
-          />
         ))}
-      </div>
+
+      </Swiper>
     </section>
   )
 }
@@ -100,36 +90,78 @@ function ProductCard({
                        isFavorite,
                        onToggleFavorite,
                      }) {
+
+  const [visited, setVisited] = useState(false);
+
+  useEffect(() => {
+    const visitedProducts =
+      JSON.parse(localStorage.getItem("visitedProducts") || "[]");
+
+    if (visitedProducts.includes(product.id)) {
+      setVisited(true);
+    }
+  }, [product.id]);
+
+
+  const handleClick = () => {
+    const visitedProducts =
+      JSON.parse(localStorage.getItem("visitedProducts") || "[]");
+
+    if (!visitedProducts.includes(product.id)) {
+      localStorage.setItem(
+        "visitedProducts",
+        JSON.stringify([...visitedProducts, product.id])
+      );
+    }
+  };
+
   return (
-    <div className="flex-shrink-0 w-[260px] snap-start">
+    <Link href={`/products/${product.id}`} onClick={handleClick} className="block decoration-0 flex-shrink-0 w-full snap-start rounded-xl shadow-lg hover:shadow transition mb-8">
       <div className="relative group">
         {/* Image */}
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted">
-          <img src={product.image || "/placeholder.svg"} alt={product.title} className="w-full h-full object-cover" />
+        <div className="relative rounded-xl overflow-hidden bg-muted h-[200px]">
+
+          <Swiper
+            slidesPerView={1}
+            pagination={{
+              clickable: true,
+            }}
+            modules={[Pagination, Autoplay]}
+            className={`
+            h-full
+            [&_.swiper-pagination-bullet-active]:!bg-[#0F6A4F]
+            [&_.swiper-pagination-bullet-active]:!w-[10px]
+            [&_.swiper-pagination-bullet-active]:!h-[10px]
+            [&_.swiper-pagination-bullet]:!bg-white
+            [&_.swiper-pagination-bullet]:!border
+            [&_.swiper-pagination-bullet]:!border-[#0F6A4F]
+            [&_.swiper-pagination-bullet]:!opacity-100
+            `}
+          >
+            {product.images?.map((image, i) => (
+              <SwiperSlide key={i}>
+                <Image src={image.image || "/placeholder.svg"} width={313} height={200} alt={product.name} className="w-full h-full object-cover" />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
           {/* Viewed Badge */}
-          {product.viewed && (
-            <div className="absolute top-2 right-2 bg-foreground/80 text-background text-xs px-2 py-1 rounded">
+          {visited && (
+            <div className="absolute top-2 right-2 bg-foreground/80 text-background text-xs px-2 py-1 rounded z-10">
               Просмотрено
             </div>
           )}
 
-          {/* Image Dots */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-            {[0, 1, 2].map((dot) => (
-              <div key={dot} className={cn("w-1.5 h-1.5 rounded-full", dot === 0 ? "bg-white" : "bg-white/50")} />
-            ))}
-          </div>
         </div>
 
         {/* Info */}
-        <div className="mt-3">
+        <div className="mt-3 px-3 pb-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-sm text-muted-foreground">{product.location}</p>
-              <h3 className="text-base font-medium text-emerald-600 truncate">{product.title}</h3>
+              <h3 className="text-base  text-[#0F6A4F] truncate font-bold">{product.name}</h3>
             </div>
-            <button onClick={onToggleFavorite} className="shrink-0 p-1">
+            <button onClick={onToggleFavorite} className="shrink-0 p-1 border-none bg-transparent cursor-pointer">
               <Heart
                 className={cn(
                   "h-5 w-5 transition-colors",
@@ -139,11 +171,11 @@ function ProductCard({
             </button>
           </div>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-lg font-bold text-foreground">{product.price}₾</span>
-            {product.unit && <span className="text-sm text-muted-foreground">{product.unit}</span>}
+            <span className="text-lg font-bold text-foreground">{product.price_lari}₾</span>
+            {product.unit_of_measurement && <span className="text-sm text-muted-foreground">1 {product.unit_of_measurement}</span>}
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

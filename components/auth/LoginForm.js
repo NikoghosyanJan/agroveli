@@ -1,30 +1,54 @@
 'use client';
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import TextField from '@/components/shared/TextField';
 import PasswordField from '@/components/shared/PasswordField';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowRight } from 'lucide-react';
+import { loginSchema } from "@/lib/validations/auth";
+import { useLoginMutation } from "@/lib/store/services/authApi";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    keepLoggedIn: false
+  const [login, {isLoading}] = useLoginMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      keepLoggedIn: false,
+    },
+    mode: 'onBlur',
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your login logic here
-    console.log('Login:', formData);
+  const keepLoggedIn = watch('keepLoggedIn');
+
+  const onSubmit = async (data) => {
+    const {data: res} = await login(data);
+
+    if(res){
+      router.push('/')
+    }
+
   };
 
   return (
     <div>
       <h2 className="text-2xl font-semibold text-center mb-2">Log In</h2>
+
       <p className="text-center text-gray-600 text-sm mb-6">
         Need a Agroveli account?{' '}
         <Link href="/register" className="text-[#FF6B2C] hover:underline">
@@ -32,29 +56,38 @@ export default function LoginForm() {
         </Link>
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate autoComplete="off">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4"
+        noValidate
+        autoComplete="off"
+      >
+        {/* Email */}
         <TextField
           label="Email"
           type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          className="mb-4"
           placeholder="Email"
+          {...register('email')}
+          error={errors.email?.message}
         />
 
+        {/* Password */}
         <PasswordField
           label="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           placeholder="••••••••••"
+          {...register('password')}
+          error={errors.password?.message}
         />
 
+        {/* Remember me */}
         <div className="flex items-center justify-between pt-2">
           <div className="flex items-center gap-2">
             <Checkbox
               id="keepLoggedIn"
-              checked={formData.keepLoggedIn}
+              checked={keepLoggedIn}
               onCheckedChange={(checked) =>
-                setFormData({ ...formData, keepLoggedIn: checked })
+                setValue('keepLoggedIn', Boolean(checked))
               }
             />
             <label
@@ -64,6 +97,7 @@ export default function LoginForm() {
               Keep me logged in
             </label>
           </div>
+
           <Link
             href="/forgot-password"
             className="text-sm text-[#FF6B2C] hover:underline"
@@ -72,7 +106,11 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <Button type="submit" className="w-full mt-6">
+        <Button
+          disabled={isLoading || isSubmitting}
+          type="submit"
+          className="w-full mt-6"
+        >
           Log in
           <ArrowRight size={20} />
         </Button>

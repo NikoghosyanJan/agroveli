@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link";
+import { useGetProfileQuery } from "@/lib/store/services/authApi";
+import Logo from "@/components/shared/Logo";
 
 const languages = [
   { code: "ru", name: "Русский", flag: "🇷🇺" },
@@ -29,38 +31,38 @@ export function Header() {
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0])
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0])
   const [searchQuery, setSearchQuery] = useState("")
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data } = useGetProfileQuery();
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
-      <div className="container mx-auto px-4">
+    <header className="sticky top-0 z-50 bg-[#E8E9EA] border-b border-border">
+      <div className=" mx-auto px-8 md:px-10 lg:px-12">
         {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl font-bold">
-              <span className="text-emerald-600">Agro</span>
-              <span className="text-foreground">Veli</span>
-            </span>
-          </div>
+          <div className={"flex items-center gap-6 lg:w-4/12"}>
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <Logo/>
+            </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Искать здесь"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-4 pr-10 h-10 rounded-full border-border bg-background"
-              />
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
-              >
-                <Search className="h-4 w-4 text-muted-foreground" />
-              </Button>
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Искать здесь"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-4 pr-10 h-10 rounded-md border-border shadow-md bg-background"
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-transparent border-none cursor-pointer"
+                >
+                  <Search className="h-4 w-4 text-[#0F6A4F]"/>
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -71,13 +73,13 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="gap-2 rounded-full px-4 h-10 border-emerald-200 hover:bg-emerald-50 bg-transparent"
+                  className="gap-2 rounded-md text-[#0F6A4F] px-4 h-10 border-[#0F6A4F] hover:bg-emerald-50 bg-transparent"
                 >
                   <span className="text-lg">{selectedLanguage.flag}</span>
                   <span className="text-sm">
                     {selectedLanguage.name.slice(0, 7)}, {selectedCurrency.symbol}
                   </span>
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4"/>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -88,7 +90,7 @@ export function Header() {
                     <span>{lang.name}</span>
                   </DropdownMenuItem>
                 ))}
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator/>
                 <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Валюта</div>
                 {currencies.map((currency) => (
                   <DropdownMenuItem key={currency.code} onClick={() => setSelectedCurrency(currency)} className="gap-2">
@@ -101,14 +103,18 @@ export function Header() {
             </DropdownMenu>
 
             {/* Add Listing Button */}
-            <Button variant="outline" className="rounded-full px-6 h-10 bg-transparent">
+            <Button variant="outline" className="rounded-md px-6 h-10 bg-transparent text-[#0F6A4F] border-[#0F6A4F]">
               Добавить
             </Button>
 
-            {/* Login Button */}
-            <Link href={"/login"}>
-              <Button className="rounded-full px-6 h-10 bg-emerald-600 hover:bg-emerald-700 text-white">Войти</Button>
-            </Link>
+            {data?.info ?
+              <Link href={"/"}>
+                <Button className="rounded-md px-6 h-10 bg-[#0F6A4F] text-white">Профиль</Button>
+              </Link> :
+              <Link href={"/login"}>
+                <Button className="rounded-md px-6 h-10 bg-[#0F6A4F] text-white">Войти</Button>
+              </Link>
+            }
           </div>
         </div>
 
@@ -117,7 +123,7 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <span className="text-xl font-bold">
-              <span className="text-emerald-600">Agro</span>
+              <span className="text-[#0F6A4F]">Agro</span>
               <span className="text-foreground">Veli</span>
             </span>
           </div>
@@ -125,13 +131,13 @@ export function Header() {
           {/* Right Actions */}
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Search className="h-5 w-5" />
+              <Search className="h-5 w-5"/>
             </Button>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5"/>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
@@ -143,7 +149,7 @@ export function Header() {
                         key={lang.code}
                         onClick={() => setSelectedLanguage(lang)}
                         className={`flex items-center gap-3 w-full p-2 rounded-lg ${
-                          selectedLanguage.code === lang.code ? "bg-emerald-50 text-emerald-700" : "hover:bg-muted"
+                          selectedLanguage.code === lang.code ? "bg-emerald-50 text-[#0F6A4F]" : "hover:bg-muted"
                         }`}
                       >
                         <span className="text-lg">{lang.flag}</span>

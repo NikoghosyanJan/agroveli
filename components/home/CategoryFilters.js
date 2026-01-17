@@ -48,26 +48,24 @@ const priceRanges = [
 ]
 
 export function CategoryFilters() {
-  const [selectedCategories, setSelectedCategories] = useState(["vegetables", "fruits"])
-  const [activeFilters, setActiveFilters] = useState({})
+  const [activeFilters, setActiveFilters] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState("")
 
   const toggleCategory = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
+    setSelectedCategory(categoryId);
   }
 
   const handleReset = () => {
-    setSelectedCategories([])
+    setSelectedCategory("")
     setActiveFilters({})
   }
 
   return (
-    <div className="bg-background border-b border-border">
-      <div className="container mx-auto px-4 py-4">
-        <div className="bg-card rounded-xl border border-border p-4 md:p-6 space-y-4">
+    <div className="bg-background ">
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-card rounded-xl border border-border p-4 md:p-6 space-y-4 shadow-md">
           {/* Categories */}
-          <div className="flex flex-wrap items-start gap-3">
+          <div className="flex justify-between flex-wrap items-start gap-3 pb-3">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground shrink-0 pt-1.5">
               <LayoutGrid className="h-4 w-4" />
               <span>Категория</span>
@@ -75,16 +73,16 @@ export function CategoryFilters() {
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => {
                 const Icon = category.icon
-                const isSelected = selectedCategories.includes(category.id)
+                const isSelected = category.id === selectedCategory
                 return (
                   <button
                     key={category.id}
                     onClick={() => toggleCategory(category.id)}
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border",
+                      "inline-flex rounded-md cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border",
                       isSelected
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-background text-foreground border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300",
+                        ? "bg-[#0F6A4F] text-white border-[#0F6A4F]"
+                        : "bg-background text-foreground border-[#0F6A4F] hover:bg-emerald-50 ",
                     )}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -96,12 +94,12 @@ export function CategoryFilters() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex justify-between flex-wrap items-center gap-3  border-t border-border pt-3 pb-3">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground shrink-0">
               <SlidersHorizontal className="h-4 w-4" />
               <span>Фильтры</span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-wrap gap-2">
                 {filters.map((filter) => (
                   <FilterDropdown
@@ -116,7 +114,7 @@ export function CategoryFilters() {
           </div>
 
           {/* Results Actions */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <ListFilter className="h-4 w-4" />
               <span>Результаты</span>
@@ -125,12 +123,12 @@ export function CategoryFilters() {
               <Button
                 variant="outline"
                 onClick={handleReset}
-                className="rounded-lg border-rose-200 text-rose-500 hover:bg-rose-50 hover:text-rose-600 gap-2 bg-transparent"
+                className="rounded-lg h-10 border-rose-200 text-rose-500 hover:bg-rose-50 hover:text-rose-600 gap-2 bg-transparent"
               >
                 Сбросить
                 <Trash2 className="h-4 w-4" />
               </Button>
-              <Button className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+              <Button className="rounded-lg h-10 bg-[#0F6A4F] text-white gap-2">
                 Поиск
                 <Search className="h-4 w-4" />
               </Button>
@@ -172,7 +170,7 @@ function FilterDropdown({
                 <div className="text-center py-1">{range.to}</div>
               </div>
             ))}
-            <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button size="sm" className="w-full bg-[#0F6A4F]  text-white">
               Выбирать
             </Button>
           </div>

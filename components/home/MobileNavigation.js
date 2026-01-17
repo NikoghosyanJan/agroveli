@@ -27,12 +27,12 @@ export function MobileNavigation() {
               className="flex flex-col items-center gap-1 py-2 px-3"
             >
               <Icon
-                className={cn("h-5 w-5 transition-colors", isActive ? "text-emerald-600" : "text-muted-foreground")}
+                className={cn("h-5 w-5 transition-colors", isActive ? "text-[#0F6A4F]" : "text-muted-foreground")}
               />
               <span
                 className={cn(
                   "text-xs transition-colors",
-                  isActive ? "text-emerald-600 font-medium" : "text-muted-foreground",
+                  isActive ? "text-[#0F6A4F] font-medium" : "text-muted-foreground",
                 )}
               >
                 {item.label}

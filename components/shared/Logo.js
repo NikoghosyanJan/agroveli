@@ -1,13 +1,11 @@
 import React from 'react';
+import Image from "next/image";
 
-export default function Logo() {
+export default function Logo({ featured = false }) {
   return (
-    <div className="text-center mb-8">
-      <h1 className="text-4xl font-bold">
-        <span className="text-[#0F766E]">Agr</span>
-        <span className="text-[#FF6B2C]">ö</span>
-        <span className="text-[#0F766E]">veli</span>
-      </h1>
+    <div className="text-center">
+      <Image src={featured ? "/assets/images/logo_featured.png" : "/assets/images/logo.png"} alt={"Logo"}
+             width={featured ? 200 : 90} height={featured ? 60 : 28} quality={100}/>
     </div>
   );
 }
