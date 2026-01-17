@@ -34,7 +34,7 @@ export const metadata = {
     siteName: "Agroveli",
     images: [
       {
-        url: "/assets/images/bg1.png",
+        url: "http://ec2-98-88-224-117.compute-1.amazonaws.com/assets/images/bg1.png",
         width: 1200,
         height: 630,
         alt: "Agroveli",
