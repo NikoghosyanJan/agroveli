@@ -1,0 +1,54 @@
+name: Deploy Next.js Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Create environment file
+        run: |
+          cat > .env.local << 'EOF'
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          EOF
+
+      - name: Build application
+        run: |
+          npm run build
+
+      - name: Copy application files
+        run: |
+          sudo mkdir -p /opt/nextjs-app
+          sudo rsync -av --delete --exclude='node_modules' --exclude='.git' --exclude='.next/cache' \
+            $GITHUB_WORKSPACE/ /opt/nextjs-app/
+
+      - name: Install production dependencies
+        run: |
+          cd /opt/nextjs-app
+          sudo npm ci --omit=dev
+
+      - name: Set permissions
+        run: |
+          sudo chown -R $USER:$USER /opt/nextjs-app
+          sudo chmod -R 755 /opt/nextjs-app
+
+      - name: Restart application
+        run: |
+          sudo systemctl restart nextjs-app
+          sudo systemctl restart nginx
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f http://127.0.0.1:3000 || exit 1
